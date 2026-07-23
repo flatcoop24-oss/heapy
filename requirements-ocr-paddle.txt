@@ -1,0 +1,6 @@
+-r requirements-ocr.txt
+numpy>=1.26,<3
+pypdfium2>=4.30,<5
+paddleocr[doc-parser]>=3.4,<4
+# Install the PaddlePaddle CPU/GPU wheel that matches the deployment hardware
+# by following https://www.paddlepaddle.org.cn/install/quick .

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heapy.local/schemas/clinical-capability.schema.json",
+  "title": "Clinical Capability",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capability_id",
+    "domain",
+    "name",
+    "risk_level",
+    "intended_outputs",
+    "required_context",
+    "required_evidence_roles",
+    "required_reviewer_roles",
+    "clinical_approval_required",
+    "activation_status",
+    "runtime_fail_action",
+    "version",
+    "status"
+  ],
+  "properties": {
+    "capability_id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "domain": {"enum": ["COMMON", "EXERCISE", "SCREENING", "MEDICATION"]},
+    "name": {"type": "string", "minLength": 1},
+    "risk_level": {"enum": ["LOW", "MODERATE", "HIGH", "CRITICAL"]},
+    "intended_outputs": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "required_context": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "required_evidence_roles": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "required_reviewer_roles": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "clinical_approval_required": {"type": "boolean"},
+    "activation_status": {"enum": ["ACTIVE_SOURCE_VERIFIED", "DESIGNED", "READY_FOR_CLINICAL_REVIEW", "CLINICALLY_APPROVED", "SUSPENDED", "RETIRED"]},
+    "runtime_fail_action": {"enum": ["ASK_CONTEXT", "CLINICAL_REVIEW_REQUIRED", "INSUFFICIENT_EVIDENCE", "SAFETY_ESCALATION"]},
+    "notes": {"type": ["string", "null"]},
+    "version": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ACTIVE", "DEFERRED", "RETIRED"]}
+  }
+}

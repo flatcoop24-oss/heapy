@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heapy.local/schemas/evaluation-case.schema.json",
+  "title": "Health Guidance Policy Evaluation Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "question",
+    "structured_context",
+    "expected_action",
+    "expected_policy_ids",
+    "required_evidence_ids",
+    "prohibited_claims",
+    "split",
+    "status"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "question": {"type": "string", "minLength": 1},
+    "structured_context": {"type": "object"},
+    "expected_action": {"type": "string"},
+    "expected_policy_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "required_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "prohibited_claims": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "split": {"enum": ["TRAIN", "DEV", "GOLD_TEST"]},
+    "status": {"enum": ["DRAFT", "ACTIVE", "RETIRED"]}
+  }
+}

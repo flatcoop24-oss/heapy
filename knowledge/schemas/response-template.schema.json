@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heapy.local/schemas/response-template.schema.json",
+  "title": "Health Guidance Response Template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "template_id",
+    "action",
+    "required_sections",
+    "forbidden_phrases",
+    "requires_citation",
+    "version",
+    "status"
+  ],
+  "properties": {
+    "template_id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "action": {"type": "string"},
+    "required_sections": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "forbidden_phrases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "fixed_notice": {"type": ["string", "null"]},
+    "requires_citation": {"type": "boolean"},
+    "version": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ACTIVE", "RETIRED"]}
+  }
+}

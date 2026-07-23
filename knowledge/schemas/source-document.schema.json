@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heapy.local/schemas/source-document.schema.json",
+  "title": "Health Guidance Source Document",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_id",
+    "authority",
+    "title",
+    "source_type",
+    "jurisdiction",
+    "version",
+    "retrieved_at",
+    "content_roles",
+    "allowed_use",
+    "prohibited_use",
+    "license_status",
+    "embedding_policy",
+    "status"
+  ],
+  "properties": {
+    "source_id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "authority": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "source_type": {
+      "enum": [
+        "INTERNAL_PRODUCT_POLICY",
+        "LAW_OR_REGULATION",
+        "OFFICIAL_GUIDELINE",
+        "OFFICIAL_FACT_SHEET",
+        "OFFICIAL_OPEN_API",
+        "OFFICIAL_EDUCATION",
+        "CLINICAL_PRACTICE_GUIDELINE",
+        "SYSTEMATIC_REVIEW",
+        "PEER_REVIEWED_STUDY",
+        "EXPERT_CONSENSUS",
+        "LICENSED_CLINICAL_DATABASE"
+      ]
+    },
+    "jurisdiction": {"type": "string", "minLength": 1},
+    "url": {"type": ["string", "null"]},
+    "local_path": {"type": ["string", "null"]},
+    "published_at": {"type": ["string", "null"], "format": "date"},
+    "version": {"type": "string", "minLength": 1},
+    "retrieved_at": {"type": "string", "format": "date"},
+    "content_roles": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "allowed_use": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "prohibited_use": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "license_status": {"enum": ["INTERNAL", "APPROVED", "SUMMARY_ONLY", "PENDING", "RESTRICTED"]},
+    "embedding_policy": {"enum": ["DENY", "ALLOW_NORMALIZED_SUMMARY", "ALLOW_EXACT_API_FIELD_ON_DEMAND", "ALLOW_CLINICALLY_APPROVED_DERIVATIVE", "PENDING"]},
+    "notes": {"type": ["string", "null"]},
+    "status": {"enum": ["ACTIVE", "DEFERRED", "RETIRED", "REJECTED"]}
+  },
+  "anyOf": [
+    {"required": ["url"]},
+    {"required": ["local_path"]}
+  ]
+}
