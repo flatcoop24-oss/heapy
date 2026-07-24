@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.2.0",
   "regulation": {
     "title": "건강검진 실시기준",
     "notice": "보건복지부고시 제2026-6호",
@@ -259,15 +259,16 @@
       ]
     },
     {
-      "item_code": "SUBJECT_SEX",
-      "display_name_ko": "성별",
+      "item_code": "SEX_FOR_CLINICAL_USE",
+      "display_name_ko": "임상 사용 성별",
       "domain": "DEMOGRAPHIC",
       "value_type": "CODE",
       "canonical_unit": null,
       "integer_only": false,
       "allowed_values": [
         "MALE",
-        "FEMALE"
+        "FEMALE",
+        "UNKNOWN"
       ]
     },
     {
@@ -665,6 +666,478 @@
       "canonical_unit": "score",
       "integer_only": false,
       "allowed_values": []
+    },
+    {
+      "item_code": "HEPATITIS_B_SURFACE_ANTIGEN",
+      "display_name_ko": "B형간염 표면항원",
+      "domain": "HEPATITIS",
+      "value_type": "NUMERIC_OR_CODE",
+      "canonical_unit": null,
+      "integer_only": false,
+      "allowed_values": [
+        "NEGATIVE",
+        "POSITIVE",
+        "INDETERMINATE"
+      ]
+    },
+    {
+      "item_code": "HEPATITIS_B_SURFACE_ANTIBODY",
+      "display_name_ko": "B형간염 표면항체",
+      "domain": "HEPATITIS",
+      "value_type": "NUMERIC_OR_CODE",
+      "canonical_unit": null,
+      "integer_only": false,
+      "allowed_values": [
+        "NEGATIVE",
+        "POSITIVE",
+        "INDETERMINATE"
+      ]
+    },
+    {
+      "item_code": "HEPATITIS_C_ANTIBODY",
+      "display_name_ko": "C형간염 항체",
+      "domain": "HEPATITIS",
+      "value_type": "NUMERIC_OR_CODE",
+      "canonical_unit": null,
+      "integer_only": false,
+      "allowed_values": [
+        "NEGATIVE",
+        "POSITIVE",
+        "INDETERMINATE"
+      ]
+    }
+  ],
+  "lab_item_profiles": [
+    {
+      "display_order": 1,
+      "item_code": "HEMOGLOBIN",
+      "display_name_en": "Hemoglobin",
+      "specimen_type": "WHOLE_BLOOD",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "남 13.0~16.5 / 여 12.0~15.5",
+      "normal_b": "남 12.0~12.9 / 여 10.0~11.9",
+      "disease_suspected": "남 12.0 미만 / 여 10.0 미만",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "빈혈",
+        "혈액검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 빈혈",
+      "notes": "성별이 필요하며 고시가 분류하지 않은 상한 초과는 임의 판정하지 않음",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 2,
+      "item_code": "FASTING_GLUCOSE",
+      "display_name_en": "Fasting plasma glucose",
+      "specimen_type": "SERUM_OR_PLASMA",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "100 미만",
+      "normal_b": "100~125",
+      "disease_suspected": "126 이상",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "당뇨병",
+        "혈액검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 당뇨병",
+      "notes": "8시간 이상 공복 여부와 검진기관 원문 판정을 함께 확인",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 3,
+      "item_code": "TOTAL_CHOLESTEROL",
+      "display_name_en": "Total cholesterol",
+      "specimen_type": "SERUM_OR_PLASMA",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "200 미만",
+      "normal_b": "200~239",
+      "disease_suspected": "240 이상",
+      "eligibility": {
+        "component_code": "LIPID_PANEL",
+        "any": [
+          {
+            "sex": "MALE",
+            "age_gte": 24
+          },
+          {
+            "sex": "FEMALE",
+            "age_gte": 40
+          }
+        ],
+        "interval_years": 4
+      },
+      "categories": [
+        "이상지질혈증",
+        "지질검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 이상지질혈증",
+      "notes": "검진일과 검진기관 참고치를 함께 보존",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 4,
+      "item_code": "HDL_CHOLESTEROL",
+      "display_name_en": "HDL cholesterol",
+      "specimen_type": "SERUM_OR_PLASMA",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "60 이상",
+      "normal_b": "40~59",
+      "disease_suspected": "40 미만",
+      "eligibility": {
+        "component_code": "LIPID_PANEL",
+        "any": [
+          {
+            "sex": "MALE",
+            "age_gte": 24
+          },
+          {
+            "sex": "FEMALE",
+            "age_gte": 40
+          }
+        ],
+        "interval_years": 4
+      },
+      "categories": [
+        "이상지질혈증",
+        "지질검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 HDL 콜레스테롤",
+      "notes": "값이 낮을수록 높은 판정 단계",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 5,
+      "item_code": "TRIGLYCERIDES",
+      "display_name_en": "Triglycerides",
+      "specimen_type": "SERUM_OR_PLASMA",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "150 미만",
+      "normal_b": "150~199",
+      "disease_suspected": "200 이상",
+      "eligibility": {
+        "component_code": "LIPID_PANEL",
+        "any": [
+          {
+            "sex": "MALE",
+            "age_gte": 24
+          },
+          {
+            "sex": "FEMALE",
+            "age_gte": 40
+          }
+        ],
+        "interval_years": 4
+      },
+      "categories": [
+        "이상지질혈증",
+        "지질검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 중성지방",
+      "notes": "검진일과 검진기관 참고치를 함께 보존",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 6,
+      "item_code": "LDL_CHOLESTEROL",
+      "display_name_en": "LDL cholesterol",
+      "specimen_type": "SERUM_OR_PLASMA",
+      "result_representation": "NUMERIC",
+      "is_derived": true,
+      "derivation_mode": "CONDITIONAL",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "130 미만",
+      "normal_b": "130~159",
+      "disease_suspected": "160 이상",
+      "eligibility": {
+        "component_code": "LIPID_PANEL",
+        "any": [
+          {
+            "sex": "MALE",
+            "age_gte": 24
+          },
+          {
+            "sex": "FEMALE",
+            "age_gte": 40
+          }
+        ],
+        "interval_years": 4
+      },
+      "categories": [
+        "이상지질혈증",
+        "지질검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 LDL 콜레스테롤",
+      "notes": "중성지방 400mg/dL 미만에서는 계산값일 수 있음. 당뇨 동반 시 LDL-C 100 미만 주석과 의사 판단 예외를 별도 적용",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 7,
+      "item_code": "AST",
+      "display_name_en": "Aspartate aminotransferase",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "40 이하",
+      "normal_b": "41~50",
+      "disease_suspected": "51 이상",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "간장질환",
+        "간기능검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 AST",
+      "notes": "단독 수치로 원인 질환을 확정하지 않음",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 8,
+      "item_code": "ALT",
+      "display_name_en": "Alanine aminotransferase",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "35 이하",
+      "normal_b": "36~45",
+      "disease_suspected": "46 이상",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "간장질환",
+        "간기능검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 ALT",
+      "notes": "단독 수치로 원인 질환을 확정하지 않음",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 9,
+      "item_code": "GAMMA_GTP",
+      "display_name_en": "Gamma-glutamyl transferase",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "남 11~63 / 여 8~35",
+      "normal_b": "남 64~77 / 여 36~45",
+      "disease_suspected": "남 78 이상 / 여 46 이상",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "간장질환",
+        "간기능검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 감마지티피",
+      "notes": "성별이 필요하며 고시가 분류하지 않은 하한 미만은 임의 판정하지 않음",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 10,
+      "item_code": "SERUM_CREATININE",
+      "display_name_en": "Serum creatinine",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "1.5 이하",
+      "normal_b": "",
+      "disease_suspected": "1.5 초과",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "신장질환",
+        "신장기능검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 혈청크레아티닌",
+      "notes": "정상B 구간 없음. 검진기관 참고치와 e-GFR을 함께 표시",
+      "allowed_values": [],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 11,
+      "item_code": "EGFR",
+      "display_name_en": "Estimated glomerular filtration rate",
+      "specimen_type": "DERIVED",
+      "result_representation": "NUMERIC",
+      "is_derived": true,
+      "derivation_mode": "ALWAYS",
+      "derivation_requires_sex": true,
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "60 이상",
+      "normal_b": "",
+      "disease_suspected": "60 미만",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "신장질환",
+        "신장기능검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 e-GFR",
+      "notes": "정상B 구간 없음. 검진기관 산출값과 계산식을 보존하고 혈청크레아티닌과 함께 표시",
+      "allowed_values": []
+    },
+    {
+      "display_order": 12,
+      "item_code": "URINE_PROTEIN",
+      "display_name_en": "Urine protein",
+      "specimen_type": "URINE",
+      "result_representation": "CODE",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "RULE_ENGINE",
+      "normal_a": "음성(-)",
+      "normal_b": "약양성(±)",
+      "disease_suspected": "양성(+1) 이상",
+      "eligibility": {
+        "all_screening_subjects": true
+      },
+      "categories": [
+        "신장질환",
+        "요검사"
+      ],
+      "source_locator": "별표 4의 별첨 1쪽 요단백",
+      "notes": "코드값과 결과지 원문 기호를 함께 보존",
+      "allowed_values": [
+        "NEGATIVE",
+        "TRACE",
+        "POSITIVE_1",
+        "POSITIVE_2",
+        "POSITIVE_3",
+        "POSITIVE_4"
+      ],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 13,
+      "item_code": "HEPATITIS_B_SURFACE_ANTIGEN",
+      "display_name_en": "Hepatitis B surface antigen",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC_OR_CODE",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "SOURCE_REPORTED_COMPOSITE",
+      "normal_a": "",
+      "normal_b": "",
+      "disease_suspected": "표면항원 양성 시 B형간염 보유자 의심(표면항체와 조합)",
+      "eligibility": {
+        "age_eq": 40,
+        "exclusions": [
+          "기존 표면항원 양성",
+          "자동·피동면역 항체형성"
+        ]
+      },
+      "categories": [
+        "B형간염",
+        "간염검사"
+      ],
+      "source_locator": "별표 1 3쪽 및 별지 제6호 결과통보서 2쪽",
+      "notes": "일반/정밀 검사 구분, 정밀검사 수치와 검진기관 기준치를 원문대로 보존",
+      "allowed_values": [
+        "NEGATIVE",
+        "POSITIVE",
+        "INDETERMINATE"
+      ],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 14,
+      "item_code": "HEPATITIS_B_SURFACE_ANTIBODY",
+      "display_name_en": "Hepatitis B surface antibody",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC_OR_CODE",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "SOURCE_REPORTED_COMPOSITE",
+      "normal_a": "항체 있음/항체 없음으로 보고(표면항원과 조합)",
+      "normal_b": "",
+      "disease_suspected": "",
+      "eligibility": {
+        "age_eq": 40,
+        "exclusions": [
+          "기존 표면항원 양성",
+          "자동·피동면역 항체형성"
+        ]
+      },
+      "categories": [
+        "B형간염",
+        "간염검사"
+      ],
+      "source_locator": "별표 1 3쪽 및 별지 제6호 결과통보서 2쪽",
+      "notes": "항체 유무를 정상A/B로 임의 변환하지 않고 표면항원과 조합한 원문 판정을 우선",
+      "allowed_values": [
+        "NEGATIVE",
+        "POSITIVE",
+        "INDETERMINATE"
+      ],
+      "derivation_requires_sex": false
+    },
+    {
+      "display_order": 15,
+      "item_code": "HEPATITIS_C_ANTIBODY",
+      "display_name_en": "Hepatitis C antibody",
+      "specimen_type": "SERUM",
+      "result_representation": "NUMERIC_OR_CODE",
+      "is_derived": false,
+      "derivation_mode": "NONE",
+      "interpretation_mode": "SOURCE_REPORTED",
+      "normal_a": "항체 없음",
+      "normal_b": "",
+      "disease_suspected": "항체 있음(C형간염 의심, 확진검사 필요)",
+      "eligibility": {
+        "age_eq": 56
+      },
+      "categories": [
+        "C형간염",
+        "간염검사"
+      ],
+      "source_locator": "별표 1 3쪽 및 별지 제6호 결과통보서 2쪽",
+      "notes": "항체 양성은 확진이 아니므로 확진검사 필요 문구를 유지",
+      "allowed_values": [
+        "NEGATIVE",
+        "POSITIVE",
+        "INDETERMINATE"
+      ],
+      "derivation_requires_sex": false
     }
   ],
   "eligibility": [
@@ -1176,7 +1649,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1203,7 +1676,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1230,7 +1703,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -1257,7 +1730,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -1284,7 +1757,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1320,7 +1793,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1356,7 +1829,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1383,7 +1856,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -1419,7 +1892,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -1455,7 +1928,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -1923,7 +2396,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1959,7 +2432,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -1995,7 +2468,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "MALE"
           },
@@ -2022,7 +2495,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -2058,7 +2531,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },
@@ -2094,7 +2567,7 @@
       "expression": {
         "all": [
           {
-            "field": "SUBJECT_SEX",
+            "field": "SEX_FOR_CLINICAL_USE",
             "op": "eq",
             "value": "FEMALE"
           },

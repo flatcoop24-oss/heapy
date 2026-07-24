@@ -29,11 +29,17 @@ python3 -m unittest tests.test_screening_regulation_preprocessing -v
 - `2026-01-07__MOHW-2026-6__screening-items.csv`: 표준 입력 항목
 - `2026-01-07__MOHW-2026-6__screening-rules.csv`: 원자·복합 판정 규칙
 - `2026-01-07__MOHW-2026-6__screening-eligibility.csv`: 연령·성별 대상 조건
+- `2026-01-07__MOHW-2026-6__labs-item-master.csv`: Notion·검수용 Labs 15종 표시 마스터
 - `2026-01-07__MOHW-2026-6__quality-report.json`: 체크섬·앵커·경계값 검사 결과
 
 규칙의 `expression`은 단일 비교와 `all`, `any`, `not` 조합을 지원합니다. 따라서 수축기와
 이완기를 함께 보는 혈압, PHQ-9 9번 문항 우선 규칙, CAPE-15 두 총점, 양쪽 귓속말 검사,
 폐기능 조합식을 값 하나로 잘못 평탄화하지 않습니다.
+
+Labs CSV의 `normal_a`, `normal_b`, `disease_suspected`는 사람 검수용 표시 문자열입니다.
+실제 판정에는 성별·경계 포함 여부·규정 유효기간이 구조화된 `screening_rule`을 사용합니다.
+B형간염 표면항원·표면항체는 조합한 원문 판정을, C형간염 항체는 검진기관의 원문 판정을
+우선합니다.
 
 ## 운영 제한
 

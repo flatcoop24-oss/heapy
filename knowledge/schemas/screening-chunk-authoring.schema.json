@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heapy.local/schemas/screening-chunk-authoring.schema.json",
+  "title": "건강검진 Data 작성용 청크",
+  "description": "RAG 파생 필드와 원문 위치 정보를 제외한 협업용 최소 청크 스키마",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "canonical_key",
+    "item_codes",
+    "section_type",
+    "domain",
+    "heading",
+    "content",
+    "keywords",
+    "safety_level",
+    "evidence_ids",
+    "review_status",
+    "version",
+    "status"
+  ],
+  "properties": {
+    "canonical_key": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "item_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      }
+    },
+    "section_type": {
+      "type": "string",
+      "enum": [
+        "LAB_EXPLANATION",
+        "TEST_EXPLANATION"
+      ]
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "HEMATOLOGY",
+        "GLUCOSE_METABOLISM",
+        "LIPID",
+        "LIVER",
+        "KIDNEY",
+        "INFECTIOUS_DISEASE"
+      ]
+    },
+    "heading": {
+      "type": "string",
+      "minLength": 2
+    },
+    "content": {
+      "type": "string",
+      "minLength": 80
+    },
+    "keywords": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "safety_level": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MODERATE",
+        "HIGH"
+      ]
+    },
+    "evidence_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      }
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "SOURCE_VERIFIED",
+        "CLINICALLY_APPROVED",
+        "REJECTED"
+      ]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "ACTIVE",
+        "DEFERRED",
+        "RETIRED",
+        "REJECTED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "review_status": {
+            "enum": [
+              "SOURCE_VERIFIED",
+              "CLINICALLY_APPROVED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "review_status": {
+            "const": "DRAFT"
+          }
+        },
+        "required": [
+          "review_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "DRAFT"
+          }
+        }
+      }
+    }
+  ]
+}

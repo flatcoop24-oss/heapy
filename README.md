@@ -43,15 +43,20 @@ knowledge/evidence/*.jsonl     -> knowledge_chunk -> embedding
 │   │   ├── 030_knowledge_chunk.sql
 │   │   ├── 040_vdb_governance.sql
 │   │   ├── 050_screening_dictionary.sql
+│   │   ├── 055_labs_item_master.sql
 │   │   ├── 060_vdb_retrieval.sql
 │   │   ├── 070_screening_output.sql
+│   │   ├── 075_user_screening_classification.sql
+│   │   ├── 076_normalize_urine_protein_rules.sql
 │   │   └── 080_clinical_guidance.sql
 │   └── seeds/
 │       ├── 010_sources.sql
 │       ├── 020_screening_dictionary.sql
+│       ├── 025_labs_item_master.sql
 │       └── 030_vdb_core.sql
 ├── docs/
 │   ├── official-data-sources.md
+│   ├── labs-item-master.md
 │   ├── product-safety-boundary.md
 │   ├── clinical-governance.md
 │   ├── guidance-policy-baseline.md
@@ -118,6 +123,8 @@ python3 -m unittest discover -s tests -v
 
 현행 건강검진 규정을 JSON·CSV로 재생성하고 경계값을 검증하는 방법은
 [건강검진 실시기준 전처리](docs/screening-regulation-preprocessing.md)를 참고합니다.
+국가건강검진 Labs 15종의 항목 원장, 판정 방식, Notion 필드 매핑은
+[Labs Item Master](docs/labs-item-master.md)를 참고합니다.
 
 NHIS 집계·청구코드와 일반건강검진 결과통보서를 사용자 관점에서 분리하고 정규화한 방법은
 [건강관리 앱 사용자 관점 전처리](docs/nhis-user-centered-preprocessing.md)를 참고합니다.

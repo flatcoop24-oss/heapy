@@ -12,8 +12,12 @@ CREATE TABLE IF NOT EXISTS screening_report (
                                   )),
     source_checksum_sha256    CHAR(64),
     parser_version            VARCHAR(100),
-    subject_sex               VARCHAR(10) NOT NULL DEFAULT 'UNKNOWN'
-                                  CHECK (subject_sex IN ('MALE', 'FEMALE', 'UNKNOWN')),
+    sex_for_clinical_use      VARCHAR(10) NOT NULL DEFAULT 'UNKNOWN'
+                                  CHECK (
+                                      sex_for_clinical_use IN (
+                                          'MALE', 'FEMALE', 'UNKNOWN'
+                                      )
+                                  ),
     verification_status       VARCHAR(30) NOT NULL DEFAULT 'UNVERIFIED'
                                   CHECK (verification_status IN (
                                       'UNVERIFIED', 'AUTO_VALIDATED',
@@ -170,7 +174,7 @@ AS $$
             o.item_code,
             o.value_numeric,
             o.value_text,
-            r.subject_sex,
+            r.sex_for_clinical_use,
             r.screened_on
         ) c ON TRUE
         LEFT JOIN LATERAL get_knowledge_by_key(i.knowledge_key, 'SIMPLE_LOOKUP') k ON TRUE
@@ -268,6 +272,8 @@ $$;
 
 COMMENT ON FUNCTION build_screening_report_output IS
     '검진 원값, 판정, 쉬운 설명, 근거, 데이터 품질을 한 JSON으로 반환하는 MVP 출력 함수';
+COMMENT ON COLUMN screening_report.sex_for_clinical_use IS
+    '해당 검진의 판정·계산에 사용할 임상 성별. 성정체성이나 행정상 gender를 추정해 대입하지 않음';
 
 -- 동일 사용자·동일 항목의 검증된 값만 시계열로 반환합니다.
 CREATE OR REPLACE FUNCTION get_screening_trend(
@@ -302,7 +308,7 @@ AS $$
         o.item_code,
         o.value_numeric,
         o.value_text,
-        r.subject_sex,
+        r.sex_for_clinical_use,
         r.screened_on
     ) c ON TRUE
     WHERE r.user_id = p_user_id

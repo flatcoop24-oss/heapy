@@ -29,6 +29,8 @@ class ScreeningRegulationPreprocessingTest(unittest.TestCase):
     def test_rule_graph_is_valid(self):
         self.assertEqual([], screening_preprocess.validate_rules())
         item_codes = {row["item_code"] for row in self.dataset["items"]}
+        self.assertIn("SEX_FOR_CLINICAL_USE", item_codes)
+        self.assertNotIn("SUBJECT_SEX", item_codes)
         for rule in self.dataset["rules"]:
             self.assertTrue(
                 screening_preprocess.expression_fields(rule["expression"]) <= item_codes
@@ -46,6 +48,13 @@ class ScreeningRegulationPreprocessingTest(unittest.TestCase):
             "DEPRESSION_SCREEN", {"PHQ9_TOTAL": 8, "PHQ9_ITEM9": 1}
         )
         self.assertEqual("PHQ9_SEVERE_SUSPECTED", result["result_code"])
+
+    def test_unknown_sex_for_clinical_use_does_not_guess_sex_scoped_result(self):
+        result = screening_preprocess.evaluate_target(
+            "ANEMIA",
+            {"SEX_FOR_CLINICAL_USE": "UNKNOWN", "HEMOGLOBIN": 11.5},
+        )
+        self.assertIsNone(result)
 
     def test_multi_input_rules_are_not_flattened(self):
         composite_targets = {
@@ -76,12 +85,93 @@ class ScreeningRegulationPreprocessingTest(unittest.TestCase):
             (screening_preprocess.ITEMS_CSV, "items"),
             (screening_preprocess.RULES_CSV, "rules"),
             (screening_preprocess.ELIGIBILITY_CSV, "eligibility"),
+            (screening_preprocess.LABS_MASTER_CSV, "lab_item_profiles"),
         )
         for filename, key in mappings:
             with self.subTest(filename=filename):
                 with (OUTPUT_DIR / filename).open(encoding="utf-8", newline="") as handle:
                     rows = list(csv.DictReader(handle))
                 self.assertEqual(len(self.dataset[key]), len(rows))
+
+    def test_labs_item_master_has_all_15_official_items(self):
+        profiles = self.dataset["lab_item_profiles"]
+        self.assertEqual(15, len(profiles))
+        self.assertEqual(list(range(1, 16)), [row["display_order"] for row in profiles])
+        self.assertEqual(
+            {
+                "HEMOGLOBIN",
+                "FASTING_GLUCOSE",
+                "TOTAL_CHOLESTEROL",
+                "HDL_CHOLESTEROL",
+                "TRIGLYCERIDES",
+                "LDL_CHOLESTEROL",
+                "AST",
+                "ALT",
+                "GAMMA_GTP",
+                "SERUM_CREATININE",
+                "EGFR",
+                "URINE_PROTEIN",
+                "HEPATITIS_B_SURFACE_ANTIGEN",
+                "HEPATITIS_B_SURFACE_ANTIBODY",
+                "HEPATITIS_C_ANTIBODY",
+            },
+            {row["item_code"] for row in profiles},
+        )
+
+    def test_labs_item_master_preserves_non_numeric_interpretation(self):
+        profiles = {
+            row["item_code"]: row for row in self.dataset["lab_item_profiles"]
+        }
+        self.assertTrue(
+            all("sex_specific" not in profile for profile in profiles.values())
+        )
+        sex_scoped_items = set()
+        for rule in self.dataset["rules"]:
+            fields = screening_preprocess.expression_fields(rule["expression"])
+            if "SEX_FOR_CLINICAL_USE" not in fields:
+                continue
+            sex_scoped_items.update(code for code in profiles if code in fields)
+        self.assertEqual(
+            {"HEMOGLOBIN", "GAMMA_GTP"},
+            sex_scoped_items,
+        )
+        self.assertEqual(
+            "SOURCE_REPORTED_COMPOSITE",
+            profiles["HEPATITIS_B_SURFACE_ANTIGEN"]["interpretation_mode"],
+        )
+        self.assertEqual(
+            "SOURCE_REPORTED_COMPOSITE",
+            profiles["HEPATITIS_B_SURFACE_ANTIBODY"]["interpretation_mode"],
+        )
+        self.assertEqual(
+            "SOURCE_REPORTED",
+            profiles["HEPATITIS_C_ANTIBODY"]["interpretation_mode"],
+        )
+        self.assertEqual(
+            "CONDITIONAL", profiles["LDL_CHOLESTEROL"]["derivation_mode"]
+        )
+        self.assertEqual("ALWAYS", profiles["EGFR"]["derivation_mode"])
+        self.assertTrue(profiles["EGFR"]["derivation_requires_sex"])
+        self.assertEqual("", profiles["SERUM_CREATININE"]["normal_b"])
+        self.assertEqual("", profiles["EGFR"]["normal_b"])
+
+    def test_labs_csv_json_columns_are_machine_readable(self):
+        path = OUTPUT_DIR / screening_preprocess.LABS_MASTER_CSV
+        with path.open(encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+        for row in rows:
+            with self.subTest(item_code=row["item_code"]):
+                self.assertIsInstance(json.loads(row["allowed_values"]), list)
+                self.assertIsInstance(json.loads(row["eligibility"]), dict)
+                self.assertIsInstance(json.loads(row["categories"]), list)
+                self.assertIn(
+                    row["classification_sex_specific"], {"True", "False"}
+                )
+                self.assertIn(row["eligibility_sex_specific"], {"True", "False"})
+                self.assertIn(
+                    row["requires_sex_for_clinical_use"], {"True", "False"}
+                )
+                self.assertTrue(row["source_locator"])
 
     def test_overall_and_oral_result_definitions_are_preserved(self):
         codes = {row["result_code"] for row in self.dataset["result_definitions"]}
