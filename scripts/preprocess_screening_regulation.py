@@ -40,6 +40,7 @@ DATASET_JSON = "2026-01-07__MOHW-2026-6__screening-regulation.json"
 ITEMS_CSV = "2026-01-07__MOHW-2026-6__screening-items.csv"
 RULES_CSV = "2026-01-07__MOHW-2026-6__screening-rules.csv"
 ELIGIBILITY_CSV = "2026-01-07__MOHW-2026-6__screening-eligibility.csv"
+LABS_MASTER_CSV = "2026-01-07__MOHW-2026-6__labs-item-master.csv"
 QUALITY_JSON = "2026-01-07__MOHW-2026-6__quality-report.json"
 
 
@@ -175,7 +176,13 @@ def item(
 
 ITEMS = [
     item("CHEST_XRAY_RESULT", "흉부방사선촬영 결과", "CHEST", "CODE", allowed_values=["NORMAL", "INACTIVE_TB", "OTHER_ABNORMAL", "IMAGE_POOR", "NOT_TAKEN"]),
-    item("SUBJECT_SEX", "성별", "DEMOGRAPHIC", "CODE", allowed_values=["MALE", "FEMALE"]),
+    item(
+        "SEX_FOR_CLINICAL_USE",
+        "임상 사용 성별",
+        "DEMOGRAPHIC",
+        "CODE",
+        allowed_values=["MALE", "FEMALE", "UNKNOWN"],
+    ),
     item("SYSTOLIC_BP", "수축기 혈압", "CARDIOVASCULAR", "NUMERIC", "mmHg"),
     item("DIASTOLIC_BP", "이완기 혈압", "CARDIOVASCULAR", "NUMERIC", "mmHg"),
     item("BMI", "체질량지수", "BODY_COMPOSITION", "NUMERIC", "kg/m2"),
@@ -217,7 +224,322 @@ ITEMS = [
     item("GINGIVITIS", "치은염증", "ORAL", "CODE", allowed_values=["NONE", "MILD", "SEVERE"]),
     item("CALCULUS", "치석", "ORAL", "CODE", allowed_values=["NONE", "MILD", "SEVERE"]),
     item("PLAQUE_SCORE", "치면세균막검사", "ORAL", "NUMERIC", "score"),
+    item("HEPATITIS_B_SURFACE_ANTIGEN", "B형간염 표면항원", "HEPATITIS", "NUMERIC_OR_CODE", allowed_values=["NEGATIVE", "POSITIVE", "INDETERMINATE"]),
+    item("HEPATITIS_B_SURFACE_ANTIBODY", "B형간염 표면항체", "HEPATITIS", "NUMERIC_OR_CODE", allowed_values=["NEGATIVE", "POSITIVE", "INDETERMINATE"]),
+    item("HEPATITIS_C_ANTIBODY", "C형간염 항체", "HEPATITIS", "NUMERIC_OR_CODE", allowed_values=["NEGATIVE", "POSITIVE", "INDETERMINATE"]),
 ]
+
+
+LAB_ITEM_PROFILES = [
+    {
+        "display_order": 1,
+        "item_code": "HEMOGLOBIN",
+        "display_name_en": "Hemoglobin",
+        "specimen_type": "WHOLE_BLOOD",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "남 13.0~16.5 / 여 12.0~15.5",
+        "normal_b": "남 12.0~12.9 / 여 10.0~11.9",
+        "disease_suspected": "남 12.0 미만 / 여 10.0 미만",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["빈혈", "혈액검사"],
+        "source_locator": "별표 4의 별첨 1쪽 빈혈",
+        "notes": "성별이 필요하며 고시가 분류하지 않은 상한 초과는 임의 판정하지 않음",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 2,
+        "item_code": "FASTING_GLUCOSE",
+        "display_name_en": "Fasting plasma glucose",
+        "specimen_type": "SERUM_OR_PLASMA",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "100 미만",
+        "normal_b": "100~125",
+        "disease_suspected": "126 이상",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["당뇨병", "혈액검사"],
+        "source_locator": "별표 4의 별첨 1쪽 당뇨병",
+        "notes": "8시간 이상 공복 여부와 검진기관 원문 판정을 함께 확인",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 3,
+        "item_code": "TOTAL_CHOLESTEROL",
+        "display_name_en": "Total cholesterol",
+        "specimen_type": "SERUM_OR_PLASMA",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "200 미만",
+        "normal_b": "200~239",
+        "disease_suspected": "240 이상",
+        "eligibility": {
+            "component_code": "LIPID_PANEL",
+            "any": [
+                {"sex": "MALE", "age_gte": 24},
+                {"sex": "FEMALE", "age_gte": 40},
+            ],
+            "interval_years": 4,
+        },
+        "categories": ["이상지질혈증", "지질검사"],
+        "source_locator": "별표 4의 별첨 1쪽 이상지질혈증",
+        "notes": "검진일과 검진기관 참고치를 함께 보존",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 4,
+        "item_code": "HDL_CHOLESTEROL",
+        "display_name_en": "HDL cholesterol",
+        "specimen_type": "SERUM_OR_PLASMA",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "60 이상",
+        "normal_b": "40~59",
+        "disease_suspected": "40 미만",
+        "eligibility": {
+            "component_code": "LIPID_PANEL",
+            "any": [
+                {"sex": "MALE", "age_gte": 24},
+                {"sex": "FEMALE", "age_gte": 40},
+            ],
+            "interval_years": 4,
+        },
+        "categories": ["이상지질혈증", "지질검사"],
+        "source_locator": "별표 4의 별첨 1쪽 HDL 콜레스테롤",
+        "notes": "값이 낮을수록 높은 판정 단계",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 5,
+        "item_code": "TRIGLYCERIDES",
+        "display_name_en": "Triglycerides",
+        "specimen_type": "SERUM_OR_PLASMA",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "150 미만",
+        "normal_b": "150~199",
+        "disease_suspected": "200 이상",
+        "eligibility": {
+            "component_code": "LIPID_PANEL",
+            "any": [
+                {"sex": "MALE", "age_gte": 24},
+                {"sex": "FEMALE", "age_gte": 40},
+            ],
+            "interval_years": 4,
+        },
+        "categories": ["이상지질혈증", "지질검사"],
+        "source_locator": "별표 4의 별첨 1쪽 중성지방",
+        "notes": "검진일과 검진기관 참고치를 함께 보존",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 6,
+        "item_code": "LDL_CHOLESTEROL",
+        "display_name_en": "LDL cholesterol",
+        "specimen_type": "SERUM_OR_PLASMA",
+        "result_representation": "NUMERIC",
+        "is_derived": True,
+        "derivation_mode": "CONDITIONAL",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "130 미만",
+        "normal_b": "130~159",
+        "disease_suspected": "160 이상",
+        "eligibility": {
+            "component_code": "LIPID_PANEL",
+            "any": [
+                {"sex": "MALE", "age_gte": 24},
+                {"sex": "FEMALE", "age_gte": 40},
+            ],
+            "interval_years": 4,
+        },
+        "categories": ["이상지질혈증", "지질검사"],
+        "source_locator": "별표 4의 별첨 1쪽 LDL 콜레스테롤",
+        "notes": "중성지방 400mg/dL 미만에서는 계산값일 수 있음. 당뇨 동반 시 LDL-C 100 미만 주석과 의사 판단 예외를 별도 적용",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 7,
+        "item_code": "AST",
+        "display_name_en": "Aspartate aminotransferase",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "40 이하",
+        "normal_b": "41~50",
+        "disease_suspected": "51 이상",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["간장질환", "간기능검사"],
+        "source_locator": "별표 4의 별첨 1쪽 AST",
+        "notes": "단독 수치로 원인 질환을 확정하지 않음",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 8,
+        "item_code": "ALT",
+        "display_name_en": "Alanine aminotransferase",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "35 이하",
+        "normal_b": "36~45",
+        "disease_suspected": "46 이상",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["간장질환", "간기능검사"],
+        "source_locator": "별표 4의 별첨 1쪽 ALT",
+        "notes": "단독 수치로 원인 질환을 확정하지 않음",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 9,
+        "item_code": "GAMMA_GTP",
+        "display_name_en": "Gamma-glutamyl transferase",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "남 11~63 / 여 8~35",
+        "normal_b": "남 64~77 / 여 36~45",
+        "disease_suspected": "남 78 이상 / 여 46 이상",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["간장질환", "간기능검사"],
+        "source_locator": "별표 4의 별첨 1쪽 감마지티피",
+        "notes": "성별이 필요하며 고시가 분류하지 않은 하한 미만은 임의 판정하지 않음",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 10,
+        "item_code": "SERUM_CREATININE",
+        "display_name_en": "Serum creatinine",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "1.5 이하",
+        "normal_b": "",
+        "disease_suspected": "1.5 초과",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["신장질환", "신장기능검사"],
+        "source_locator": "별표 4의 별첨 1쪽 혈청크레아티닌",
+        "notes": "정상B 구간 없음. 검진기관 참고치와 e-GFR을 함께 표시",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 11,
+        "item_code": "EGFR",
+        "display_name_en": "Estimated glomerular filtration rate",
+        "specimen_type": "DERIVED",
+        "result_representation": "NUMERIC",
+        "is_derived": True,
+        "derivation_mode": "ALWAYS",
+        "derivation_requires_sex": True,
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "60 이상",
+        "normal_b": "",
+        "disease_suspected": "60 미만",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["신장질환", "신장기능검사"],
+        "source_locator": "별표 4의 별첨 1쪽 e-GFR",
+        "notes": "정상B 구간 없음. 검진기관 산출값과 계산식을 보존하고 혈청크레아티닌과 함께 표시",
+        "allowed_values": [],
+    },
+    {
+        "display_order": 12,
+        "item_code": "URINE_PROTEIN",
+        "display_name_en": "Urine protein",
+        "specimen_type": "URINE",
+        "result_representation": "CODE",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "RULE_ENGINE",
+        "normal_a": "음성(-)",
+        "normal_b": "약양성(±)",
+        "disease_suspected": "양성(+1) 이상",
+        "eligibility": {"all_screening_subjects": True},
+        "categories": ["신장질환", "요검사"],
+        "source_locator": "별표 4의 별첨 1쪽 요단백",
+        "notes": "코드값과 결과지 원문 기호를 함께 보존",
+        "allowed_values": ["NEGATIVE", "TRACE", "POSITIVE_1", "POSITIVE_2", "POSITIVE_3", "POSITIVE_4"],
+    },
+    {
+        "display_order": 13,
+        "item_code": "HEPATITIS_B_SURFACE_ANTIGEN",
+        "display_name_en": "Hepatitis B surface antigen",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC_OR_CODE",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "SOURCE_REPORTED_COMPOSITE",
+        "normal_a": "",
+        "normal_b": "",
+        "disease_suspected": "표면항원 양성 시 B형간염 보유자 의심(표면항체와 조합)",
+        "eligibility": {
+            "age_eq": 40,
+            "exclusions": ["기존 표면항원 양성", "자동·피동면역 항체형성"],
+        },
+        "categories": ["B형간염", "간염검사"],
+        "source_locator": "별표 1 3쪽 및 별지 제6호 결과통보서 2쪽",
+        "notes": "일반/정밀 검사 구분, 정밀검사 수치와 검진기관 기준치를 원문대로 보존",
+        "allowed_values": ["NEGATIVE", "POSITIVE", "INDETERMINATE"],
+    },
+    {
+        "display_order": 14,
+        "item_code": "HEPATITIS_B_SURFACE_ANTIBODY",
+        "display_name_en": "Hepatitis B surface antibody",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC_OR_CODE",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "SOURCE_REPORTED_COMPOSITE",
+        "normal_a": "항체 있음/항체 없음으로 보고(표면항원과 조합)",
+        "normal_b": "",
+        "disease_suspected": "",
+        "eligibility": {
+            "age_eq": 40,
+            "exclusions": ["기존 표면항원 양성", "자동·피동면역 항체형성"],
+        },
+        "categories": ["B형간염", "간염검사"],
+        "source_locator": "별표 1 3쪽 및 별지 제6호 결과통보서 2쪽",
+        "notes": "항체 유무를 정상A/B로 임의 변환하지 않고 표면항원과 조합한 원문 판정을 우선",
+        "allowed_values": ["NEGATIVE", "POSITIVE", "INDETERMINATE"],
+    },
+    {
+        "display_order": 15,
+        "item_code": "HEPATITIS_C_ANTIBODY",
+        "display_name_en": "Hepatitis C antibody",
+        "specimen_type": "SERUM",
+        "result_representation": "NUMERIC_OR_CODE",
+        "is_derived": False,
+        "derivation_mode": "NONE",
+        "interpretation_mode": "SOURCE_REPORTED",
+        "normal_a": "항체 없음",
+        "normal_b": "",
+        "disease_suspected": "항체 있음(C형간염 의심, 확진검사 필요)",
+        "eligibility": {"age_eq": 56},
+        "categories": ["C형간염", "간염검사"],
+        "source_locator": "별표 1 3쪽 및 별지 제6호 결과통보서 2쪽",
+        "notes": "항체 양성은 확진이 아니므로 확진검사 필요 문구를 유지",
+        "allowed_values": ["NEGATIVE", "POSITIVE", "INDETERMINATE"],
+    },
+]
+
+for profile in LAB_ITEM_PROFILES:
+    profile.setdefault("derivation_requires_sex", False)
 
 
 def leaf(field: str, op: str, value: Any) -> dict[str, Any]:
@@ -304,13 +626,13 @@ add_rule("BMI_BORDERLINE", "OBESITY_BMI", "NORMAL_B_HIGH", "정상B(경계)", "N
 add_rule("BMI_SUSPECTED", "OBESITY_BMI", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, leaf("BMI", "gte", 30), "별표4의 별첨 1쪽 비만")
 
 for sex, cutoff in (("MALE", 90), ("FEMALE", 85)):
-    add_rule(f"WAIST_{sex}_NORMAL", "ABDOMINAL_OBESITY", "NORMAL_A", "정상A", "NORMAL_A", 10, all_of(leaf("SUBJECT_SEX", "eq", sex), leaf("WAIST_CIRCUMFERENCE", "lt", cutoff)), "별표4의 별첨 1쪽 허리둘레")
-    add_rule(f"WAIST_{sex}_SUSPECTED", "ABDOMINAL_OBESITY", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, all_of(leaf("SUBJECT_SEX", "eq", sex), leaf("WAIST_CIRCUMFERENCE", "gte", cutoff)), "별표4의 별첨 1쪽 허리둘레")
+    add_rule(f"WAIST_{sex}_NORMAL", "ABDOMINAL_OBESITY", "NORMAL_A", "정상A", "NORMAL_A", 10, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), leaf("WAIST_CIRCUMFERENCE", "lt", cutoff)), "별표4의 별첨 1쪽 허리둘레")
+    add_rule(f"WAIST_{sex}_SUSPECTED", "ABDOMINAL_OBESITY", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), leaf("WAIST_CIRCUMFERENCE", "gte", cutoff)), "별표4의 별첨 1쪽 허리둘레")
 
 for sex, normal_low, normal_high, border_low in (("MALE", 13.0, 16.5, 12.0), ("FEMALE", 12.0, 15.5, 10.0)):
-    add_rule(f"HEMOGLOBIN_{sex}_NORMAL", "ANEMIA", "NORMAL_A", "정상A", "NORMAL_A", 10, all_of(leaf("SUBJECT_SEX", "eq", sex), between("HEMOGLOBIN", normal_low, normal_high)), "별표4의 별첨 1쪽 빈혈")
-    add_rule(f"HEMOGLOBIN_{sex}_BORDERLINE", "ANEMIA", "NORMAL_B", "정상B(경계)", "NORMAL_B", 20, all_of(leaf("SUBJECT_SEX", "eq", sex), between("HEMOGLOBIN", border_low, normal_low, upper_inclusive=False)), "별표4의 별첨 1쪽 빈혈")
-    add_rule(f"HEMOGLOBIN_{sex}_SUSPECTED", "ANEMIA", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, all_of(leaf("SUBJECT_SEX", "eq", sex), leaf("HEMOGLOBIN", "lt", border_low)), "별표4의 별첨 1쪽 빈혈", notes="원문이 정의하지 않은 상한 초과는 임의 판정하지 않음")
+    add_rule(f"HEMOGLOBIN_{sex}_NORMAL", "ANEMIA", "NORMAL_A", "정상A", "NORMAL_A", 10, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), between("HEMOGLOBIN", normal_low, normal_high)), "별표4의 별첨 1쪽 빈혈")
+    add_rule(f"HEMOGLOBIN_{sex}_BORDERLINE", "ANEMIA", "NORMAL_B", "정상B(경계)", "NORMAL_B", 20, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), between("HEMOGLOBIN", border_low, normal_low, upper_inclusive=False)), "별표4의 별첨 1쪽 빈혈")
+    add_rule(f"HEMOGLOBIN_{sex}_SUSPECTED", "ANEMIA", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), leaf("HEMOGLOBIN", "lt", border_low)), "별표4의 별첨 1쪽 빈혈", notes="원문이 정의하지 않은 상한 초과는 임의 판정하지 않음")
 
 add_three_band("GLUCOSE", "DIABETES", "FASTING_GLUCOSE", leaf("FASTING_GLUCOSE", "lt", 100), between("FASTING_GLUCOSE", 100, 126, upper_inclusive=False), leaf("FASTING_GLUCOSE", "gte", 126), "별표4의 별첨 1쪽 당뇨병")
 add_three_band("TOTAL_CHOL", "DYSLIPIDEMIA_TOTAL", "TOTAL_CHOLESTEROL", leaf("TOTAL_CHOLESTEROL", "lt", 200), between("TOTAL_CHOLESTEROL", 200, 240, upper_inclusive=False), leaf("TOTAL_CHOLESTEROL", "gte", 240), "별표4의 별첨 1쪽 이상지질혈증")
@@ -321,9 +643,9 @@ add_three_band("AST", "LIVER_AST", "AST", leaf("AST", "lte", 40), between("AST",
 add_three_band("ALT", "LIVER_ALT", "ALT", leaf("ALT", "lte", 35), between("ALT", 35, 45, lower_inclusive=False), leaf("ALT", "gt", 45), "별표4의 별첨 1쪽 간장질환 ALT")
 
 for sex, normal_low, normal_high, borderline_high in (("MALE", 11, 63, 77), ("FEMALE", 8, 35, 45)):
-    add_rule(f"GGT_{sex}_NORMAL", "LIVER_GGT", "NORMAL_A", "정상A", "NORMAL_A", 10, all_of(leaf("SUBJECT_SEX", "eq", sex), between("GAMMA_GTP", normal_low, normal_high)), "별표4의 별첨 1쪽 감마지티피")
-    add_rule(f"GGT_{sex}_BORDERLINE", "LIVER_GGT", "NORMAL_B", "정상B(경계)", "NORMAL_B", 20, all_of(leaf("SUBJECT_SEX", "eq", sex), between("GAMMA_GTP", normal_high, borderline_high, lower_inclusive=False)), "별표4의 별첨 1쪽 감마지티피")
-    add_rule(f"GGT_{sex}_SUSPECTED", "LIVER_GGT", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, all_of(leaf("SUBJECT_SEX", "eq", sex), leaf("GAMMA_GTP", "gt", borderline_high)), "별표4의 별첨 1쪽 감마지티피", notes="원문이 정의하지 않은 정상범위 하한 미만은 임의 판정하지 않음")
+    add_rule(f"GGT_{sex}_NORMAL", "LIVER_GGT", "NORMAL_A", "정상A", "NORMAL_A", 10, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), between("GAMMA_GTP", normal_low, normal_high)), "별표4의 별첨 1쪽 감마지티피")
+    add_rule(f"GGT_{sex}_BORDERLINE", "LIVER_GGT", "NORMAL_B", "정상B(경계)", "NORMAL_B", 20, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), between("GAMMA_GTP", normal_high, borderline_high, lower_inclusive=False)), "별표4의 별첨 1쪽 감마지티피")
+    add_rule(f"GGT_{sex}_SUSPECTED", "LIVER_GGT", "DISEASE_SUSPECTED", "질환의심", "DISEASE_SUSPECTED", 30, all_of(leaf("SEX_FOR_CLINICAL_USE", "eq", sex), leaf("GAMMA_GTP", "gt", borderline_high)), "별표4의 별첨 1쪽 감마지티피", notes="원문이 정의하지 않은 정상범위 하한 미만은 임의 판정하지 않음")
 
 add_rule("URINE_PROTEIN_NEGATIVE", "KIDNEY_URINE_PROTEIN", "NORMAL_A", "음성(-)", "NORMAL_A", 10, leaf("URINE_PROTEIN", "eq", "NEGATIVE"), "별표4의 별첨 1쪽 요단백")
 add_rule("URINE_PROTEIN_TRACE", "KIDNEY_URINE_PROTEIN", "NORMAL_B", "약양성(±)", "NORMAL_B", 20, leaf("URINE_PROTEIN", "eq", "TRACE"), "별표4의 별첨 1쪽 요단백")
@@ -452,6 +774,16 @@ def expression_fields(expression: dict[str, Any]) -> set[str]:
     return fields
 
 
+def contains_json_key(value: Any, target_key: str) -> bool:
+    if isinstance(value, dict):
+        return target_key in value or any(
+            contains_json_key(child, target_key) for child in value.values()
+        )
+    if isinstance(value, list):
+        return any(contains_json_key(child, target_key) for child in value)
+    return False
+
+
 def evaluate_expression(expression: dict[str, Any], values: dict[str, Any]) -> bool:
     if "all" in expression:
         return all(evaluate_expression(child, values) for child in expression["all"])
@@ -535,6 +867,24 @@ def validate_rules() -> list[str]:
     result_definition_codes = [row["result_code"] for row in RESULT_DEFINITIONS]
     if len(result_definition_codes) != len(set(result_definition_codes)):
         errors.append("duplicate result definition code")
+    lab_item_codes = [row["item_code"] for row in LAB_ITEM_PROFILES]
+    if len(lab_item_codes) != len(set(lab_item_codes)):
+        errors.append("duplicate lab item_code")
+    missing_lab_items = set(lab_item_codes) - set(item_codes)
+    if missing_lab_items:
+        errors.append(f"lab profile references unknown items: {sorted(missing_lab_items)}")
+    if len(LAB_ITEM_PROFILES) != 15:
+        errors.append(f"expected 15 lab item profiles, got {len(LAB_ITEM_PROFILES)}")
+    expected_order = list(range(1, len(LAB_ITEM_PROFILES) + 1))
+    actual_order = [row["display_order"] for row in LAB_ITEM_PROFILES]
+    if actual_order != expected_order:
+        errors.append(f"lab display_order is not contiguous: {actual_order}")
+    for profile in LAB_ITEM_PROFILES:
+        expected_derived = profile["derivation_mode"] != "NONE"
+        if profile["is_derived"] != expected_derived:
+            errors.append(
+                f"{profile['item_code']} has inconsistent derivation metadata"
+            )
     known = set(item_codes)
     for rule in RULES:
         missing = expression_fields(rule["expression"]) - known
@@ -556,7 +906,7 @@ def rule_type(expression: dict[str, Any]) -> str:
 
 def build_dataset(documents: list[dict[str, Any]]) -> dict[str, Any]:
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "1.2.0",
         "regulation": {
             "title": "건강검진 실시기준",
             "notice": "보건복지부고시 제2026-6호",
@@ -568,6 +918,7 @@ def build_dataset(documents: list[dict[str, Any]]) -> dict[str, Any]:
         "documents": documents,
         "result_definitions": RESULT_DEFINITIONS,
         "items": ITEMS,
+        "lab_item_profiles": LAB_ITEM_PROFILES,
         "eligibility": ELIGIBILITY,
         "rules": [dict(rule, rule_type=rule_type(rule["expression"])) for rule in RULES],
         "boundary_cases": BOUNDARY_CASES,
@@ -598,12 +949,65 @@ def render_artifacts(dataset: dict[str, Any], errors: list[str]) -> dict[str, st
     items_fields = ["item_code", "display_name_ko", "domain", "value_type", "canonical_unit", "integer_only", "allowed_values"]
     rule_fields = ["rule_id", "rule_type", "target_condition", "result_code", "result_label_original", "normalized_status", "severity_rank", "priority", "expression", "source_document_code", "source_locator", "notes"]
     eligibility_fields = ["component_code", "display_name_ko", "eligibility", "interval", "source_locator"]
+    labs_master_fields = [
+        "display_order",
+        "item_code",
+        "display_name_en",
+        "display_name_ko",
+        "specimen_type",
+        "result_representation",
+        "canonical_unit",
+        "classification_sex_specific",
+        "eligibility_sex_specific",
+        "derivation_requires_sex",
+        "requires_sex_for_clinical_use",
+        "is_derived",
+        "derivation_mode",
+        "interpretation_mode",
+        "normal_a",
+        "normal_b",
+        "disease_suspected",
+        "allowed_values",
+        "eligibility",
+        "categories",
+        "source_locator",
+        "notes",
+    ]
+    items_by_code = {row["item_code"]: row for row in dataset["items"]}
+    classification_sex_specific_items: set[str] = set()
+    for rule in dataset["rules"]:
+        fields = expression_fields(rule["expression"])
+        if "SEX_FOR_CLINICAL_USE" not in fields:
+            continue
+        classification_sex_specific_items.update(
+            profile["item_code"]
+            for profile in dataset["lab_item_profiles"]
+            if profile["item_code"] in fields
+        )
+    labs_master_rows = [
+        {
+            **row,
+            "display_name_ko": items_by_code[row["item_code"]]["display_name_ko"],
+            "canonical_unit": items_by_code[row["item_code"]]["canonical_unit"],
+            "classification_sex_specific":
+                row["item_code"] in classification_sex_specific_items,
+            "eligibility_sex_specific":
+                contains_json_key(row["eligibility"], "sex"),
+            "requires_sex_for_clinical_use": (
+                row["item_code"] in classification_sex_specific_items
+                or contains_json_key(row["eligibility"], "sex")
+                or row["derivation_requires_sex"]
+            ),
+        }
+        for row in dataset["lab_item_profiles"]
+    ]
     atomic_count = sum(1 for row in dataset["rules"] if row["rule_type"] == "ATOMIC")
     quality = {
         "status": "PASS" if not errors else "FAIL",
         "dataset": {
             "document_count": len(dataset["documents"]),
             "item_count": len(dataset["items"]),
+            "lab_item_count": len(dataset["lab_item_profiles"]),
             "rule_count": len(dataset["rules"]),
             "atomic_rule_count": atomic_count,
             "composite_rule_count": len(dataset["rules"]) - atomic_count,
@@ -614,6 +1018,8 @@ def render_artifacts(dataset: dict[str, Any], errors: list[str]) -> dict[str, st
             "source_checksums": all(doc["actual_sha256"] == doc["sha256"] for doc in dataset["documents"]),
             "source_page_anchors": all(check["passed"] for doc in dataset["documents"] for check in doc["anchor_checks"]),
             "unique_item_codes": len({row["item_code"] for row in ITEMS}) == len(ITEMS),
+            "complete_lab_item_master": len(LAB_ITEM_PROFILES) == 15
+            and len({row["item_code"] for row in LAB_ITEM_PROFILES}) == 15,
             "unique_rule_ids": len({row["rule_id"] for row in RULES}) == len(RULES),
             "boundary_cases": not any(error.startswith("boundary ") for error in errors),
         },
@@ -630,6 +1036,7 @@ def render_artifacts(dataset: dict[str, Any], errors: list[str]) -> dict[str, st
         ITEMS_CSV: csv_text(dataset["items"], items_fields),
         RULES_CSV: csv_text(dataset["rules"], rule_fields),
         ELIGIBILITY_CSV: csv_text(dataset["eligibility"], eligibility_fields),
+        LABS_MASTER_CSV: csv_text(labs_master_rows, labs_master_fields),
         QUALITY_JSON: json.dumps(quality, ensure_ascii=False, indent=2) + "\n",
     }
 
@@ -668,6 +1075,7 @@ def main() -> int:
         "status": "PASS" if not errors else "FAIL",
         "documents": len(documents),
         "items": len(ITEMS),
+        "lab_items": len(LAB_ITEM_PROFILES),
         "rules": len(RULES),
         "eligibility": len(ELIGIBILITY),
         "boundary_cases": len(BOUNDARY_CASES),

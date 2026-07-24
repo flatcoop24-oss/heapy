@@ -85,7 +85,7 @@ CREATE OR REPLACE FUNCTION classify_screening_value(
     p_item_code VARCHAR,
     p_numeric_value NUMERIC DEFAULT NULL,
     p_text_value TEXT DEFAULT NULL,
-    p_sex VARCHAR DEFAULT 'ANY',
+    p_sex_for_clinical_use VARCHAR DEFAULT 'UNKNOWN',
     p_observed_on DATE DEFAULT CURRENT_DATE
 )
 RETURNS TABLE (
@@ -108,7 +108,7 @@ AS $$
       AND p_observed_on >= rs.effective_from
       AND (rs.effective_to IS NULL OR p_observed_on <= rs.effective_to)
       AND r.item_code = p_item_code
-      AND r.sex_scope IN ('ANY', UPPER(p_sex))
+      AND r.sex_scope IN ('ANY', UPPER(p_sex_for_clinical_use))
       AND (
           (
               p_numeric_value IS NOT NULL
@@ -132,10 +132,13 @@ AS $$
           )
       )
     ORDER BY
-        CASE WHEN r.sex_scope = UPPER(p_sex) THEN 0 ELSE 1 END,
+        CASE
+            WHEN r.sex_scope = UPPER(p_sex_for_clinical_use) THEN 0
+            ELSE 1
+        END,
         r.priority DESC
     LIMIT 1;
 $$;
 
 COMMENT ON FUNCTION classify_screening_value IS
-    '검사일·성별·단위를 정규화한 뒤 현행 판정규칙으로 상태를 반환. 진단 함수가 아님';
+    '검사일과 sex_for_clinical_use에 맞는 현행 판정규칙으로 상태를 반환. 진단 함수가 아님';

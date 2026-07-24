@@ -2,7 +2,8 @@
   "status": "PASS",
   "dataset": {
     "document_count": 3,
-    "item_count": 43,
+    "item_count": 46,
+    "lab_item_count": 15,
     "rule_count": 104,
     "atomic_rule_count": 56,
     "composite_rule_count": 48,
@@ -13,6 +14,7 @@
     "source_checksums": true,
     "source_page_anchors": true,
     "unique_item_codes": true,
+    "complete_lab_item_master": true,
     "unique_rule_ids": true,
     "boundary_cases": true
   },

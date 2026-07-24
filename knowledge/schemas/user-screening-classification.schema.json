@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heapy.local/schemas/user-screening-classification.schema.json",
+  "title": "Users 건강검진 기록 판정 결과",
+  "description": "검증된 사용자 건강검진 기록을 공식 국가건강검진 규칙으로 분류한 결과",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "item_code",
+    "classification_status",
+    "normality",
+    "is_normal_a",
+    "decision_state",
+    "requires_review",
+    "reason_code",
+    "basis",
+    "normalized_value",
+    "reported_interpretation_code",
+    "source_computed_mismatch",
+    "rule",
+    "disclaimer"
+  ],
+  "properties": {
+    "record_id": {
+      "type": ["string", "null"]
+    },
+    "item_code": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "classification_status": {
+      "type": "string",
+      "enum": [
+        "NORMAL_A",
+        "NORMAL_B",
+        "DISEASE_SUSPECTED",
+        "SOURCE_REPORTED",
+        "UNCLASSIFIED"
+      ]
+    },
+    "normality": {
+      "type": "string",
+      "enum": [
+        "NORMAL",
+        "BORDERLINE",
+        "SUSPECTED",
+        "SOURCE_REPORTED",
+        "UNCLASSIFIED"
+      ]
+    },
+    "is_normal_a": {
+      "type": ["boolean", "null"]
+    },
+    "decision_state": {
+      "type": "string",
+      "enum": [
+        "CLASSIFIED",
+        "SOURCE_RECORDED",
+        "REVIEW_REQUIRED"
+      ]
+    },
+    "requires_review": {
+      "type": "boolean"
+    },
+    "reason_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "basis": {
+      "type": "string",
+      "enum": [
+        "OFFICIAL_RULE",
+        "SOURCE_REPORTED",
+        "NONE"
+      ]
+    },
+    "normalized_value": {
+      "type": ["string", "null"]
+    },
+    "reported_interpretation_code": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "source_computed_mismatch": {
+      "type": "boolean"
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "rule_version",
+        "source_document_code",
+        "source_locator"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": ["string", "null"]
+        },
+        "rule_version": {
+          "type": "string"
+        },
+        "source_document_code": {
+          "type": ["string", "null"]
+        },
+        "source_locator": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "disclaimer": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}
